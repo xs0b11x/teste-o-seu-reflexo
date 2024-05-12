@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-color: rgb(105, 142, 241);
+            color: white;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            font-family: 'Arial', sans-serif;
+            text-shadow: 2px 2px 4px #000000;
+        }
+        #target {
+            width: 200px;
+            height: 200px;
+            background-color: red;
+            border-radius: 50%;
+            margin-top: 20px;
+            box-shadow: 5px 5px 5px rgb(39, 38, 38);
+        }
+        #startButton {
+            font-size: 36px;
+            padding: 10px;
+            background-color: #2e6830; /* Green */
+            border: none;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 12px;
+            border: 2px solid white;
+            box-shadow: 2px 2px 4px #000000;
+        }
+        #credits {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: rgb(0, 0, 0);
+        }
+        #musicControls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        #ranking {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: white;
+            color: black;
+            padding: 10px;
+            border-radius: 10px;
+            font-family: 'Arial', sans-serif;
+            border: 2px solid black;
+            box-shadow: 2px 2px 4px #000000;
+        }
+        #instructions {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 4px #000000;
+        }
+    </style>
+</head>
+<body>
+    <div id="instructions">
+        <p>Teste o seu reflexo!</p>
+        <button onclick="document.getElementById('instructions').style.display='none'">Entendi</button>
+    </div>
+
+    <div id="musicControls">
+        <button id="playMusic">Reproduzir Música</button>
+        <button id="pauseMusic">Pausar Música</button>
+    </div>
+
+    <button id="startButton">Iniciar Jogo</button>
+    <div id="target"></div>
+    <p id="time">Clique em 'Iniciar Jogo' para começar</p>
+    <div id="credits">Developed By - brunoo novais</div>
+
+    <div id="ranking">Melhores tempos:</div>
+
+    <audio id="backgroundMusic" src="backgroundMusic.mp3" loop></audio>
+    <audio id="clickSound" src="clickSound.mp3"></audio>
+    <audio id="startSound" src="startSound.mp3"></audio>
+
+    <script>
+        var target = document.getElementById('target');
+        var timeDisplay = document.getElementById('time');
+        var startButton = document.getElementById('startButton');
+        var startTime;
+
+        var backgroundMusic = document.getElementById('backgroundMusic');
+        var clickSound = document.getElementById('clickSound');
+        var startSound = document.getElementById('startSound');
+
+        var playMusicButton = document.getElementById('playMusic');
+        var pauseMusicButton = document.getElementById('pauseMusic');
+
+        var ranking = document.getElementById('ranking');
+        var bestTimes = [];
+
+        var attempts = 0;
+
+        playMusicButton.addEventListener('click', function() {
+            backgroundMusic.play();
+        });
+
+        pauseMusicButton.addEventListener('click', function() {
+            backgroundMusic.pause();
+        });
+
+        startButton.addEventListener('click', function() {
+            attempts = prompt("Quantas tentativas você gostaria de ter? (1 ou 3)", "1");
+            attempts = Math.max(1, Math.min(3, attempts));
+            startGame();
+        });
+
+        function startGame() {
+            startButton.style.display = 'none';
+            startSound.play();
+            var countdown = 3;
+            timeDisplay.textContent = countdown;
+            var countdownInterval = setInterval(function() {
+                countdown--;
+                if (countdown < 0) {
+                    clearInterval(countdownInterval);
+                    timeDisplay.textContent = "Clique na bola quando ficar verde";
+                    target.style.backgroundColor = 'red';
+                    setTimeout(changeToGreen, Math.random() * 2000 + 1000);
+                } else {
+                    timeDisplay.textContent = countdown;
+                }
+            }, 1000);
+        }
+
+        target.addEventListener('click', function() {
+            if (target.style.backgroundColor == 'green') {
+                clickSound.play();
+                var endTime = new Date();
+                var reactionTime = (endTime - startTime) / 1000;
+                timeDisplay.textContent = 'Seu tempo de reação foi: ' + reactionTime + ' segundos';
+                target.style.backgroundColor = 'red';
+
+                bestTimes.push(reactionTime);
+                bestTimes.sort(function(a, b) { return a - b; });
+
+                ranking.innerHTML = 'Melhores tempos:<br>';
+                for (var i = 0; i < bestTimes.length; i++) {
+                    ranking.innerHTML += (i + 1) + '. ' + bestTimes[i] + ' segundos<br>';
+                }
+
+                attempts--;
+                if (attempts > 0) {
+                    startGame();
+                } else {
+                    startButton.style.display = 'block';
+                }
+            }
+        });
+
+        function changeToGreen() {
+            target.style.backgroundColor = 'green';
+            startTime = new Date();
+        }
+    </script>
+</body>
+</html>
